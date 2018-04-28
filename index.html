@@ -1,0 +1,552 @@
+<!--
+    2017.01.10
+    v0.4 -> v0.5
+    將表格由ol和li改成table
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>圖像式選課系統</title>
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+    <style>
+        #information span{
+            padding-left: 5px;
+        }
+        
+        #listWrapper{
+            width: 150px;
+            height: 100px;
+            margin: 33px 0px 0px 50px;
+            float: left;
+        }
+        
+        .detail3{
+            border-style: none none none solid;
+            border-color: #83d160;
+            border-left-width: 8px;
+            background-color:#f0fff9;
+            box-shadow: 2px 2px #888888;
+            margin: 5px 5px 15px 0px;
+        }
+        
+        .detail2{
+            border-style: none none none solid;
+            border-color: #224aa3;
+            border-left-width: 8px;
+            background-color:aliceblue;
+            box-shadow: 2px 2px #888888;
+            margin: 5px 5px 15px 0px;
+        }
+        
+        .detail3:hover{
+            cursor: pointer;
+            box-shadow: 3px 3px BLACK;
+            background-color: #81b5a2;
+        }
+        
+        .detail2:hover{
+            cursor: pointer;
+            box-shadow: 3px 3px BLACK;
+            background-color: #81a7c7;
+        }
+        
+        .m_size{
+            width: 150px;
+            height: 260px;
+            position: fixed;
+            float: left;
+        }
+        
+        .m_outline{
+            border: 3px solid black;
+            background-color: white;
+        }
+        
+        .m_creditOutline{
+            border: 1px dotted black;
+            width: 100px;
+            margin: 0 auto;
+        }
+        
+        .m_hidden{
+            display: none;
+        }
+        
+        .newCard1{
+            width: 100px;
+            height: 107px;
+            background-color: aquamarine;
+        }
+        
+        .newCard2{
+            width: 100px;
+            height: 71px;
+            background-color: aquamarine;
+        }
+        
+        .fixed:hover{
+            cursor:default;
+        }
+        
+        .credit3on{
+            background-color: #57b846;
+        }
+        
+        .credit2on{
+            background-color: #466db8;
+        }
+        
+        #confirm{
+            text-align:center;
+            margin-top:450px;
+            width:70px;
+            height: 30px;
+            position: fixed;
+            float: left;
+        }
+        
+        #confirm:hover{
+            cursor: pointer;
+        }
+        
+        #cancel{
+            text-align:center;
+            margin-top:450px;
+            margin-left:80px;
+            width:70px;
+            height: 30px;
+            position: fixed;
+            float: left;
+        }
+        
+        #cancel:hover{
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        //課程
+        var c_3_Data = JSON.parse(localStorage.getItem("c_3_Data"));
+        var c_2_Data = JSON.parse(localStorage.getItem("c_2_Data"));
+        var oBGC ;
+        var currentCredit = 0;
+        
+        $(document).on("click",".detail3",function(){
+            
+           var target = c_3_Data[$(this).attr("id")];
+            if((currentCredit+target.credit)>25){
+                alert("超過學分上限");
+                $(this).closest('.ui-dialog-content').dialog('close');
+                return;
+            }
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).finish();
+               $("#"+target.time[i]).empty();
+               $("#"+target.time[i]).addClass("credit3on selected");
+               $("#"+target.time[i]).append("<span>"+target.className+"</span>");
+               $("#"+target.time[i]).css("color","black");
+               //$("#"+target.time[i]).css("background-color","#83d160");
+               //$("#"+target.time[i]).addClass("fixed");
+               $(this).closest('.ui-dialog-content').dialog('close');
+           }
+            
+            currentCredit += target.credit;
+            renewCurrentCredit(currentCredit);
+        });
+        
+        $(document).on("click",".detail2",function(){
+            
+           var target = c_2_Data[$(this).attr("id")];
+            if((currentCredit+target.credit)>25){
+                alert("超過學分上限");
+                $(this).closest('.ui-dialog-content').dialog('close');
+                return;
+            }
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).finish();
+               $("#"+target.time[i]).empty();
+               $("#"+target.time[i]).addClass("credit2on selected");
+               $("#"+target.time[i]).append("<span>"+target.className+"</span>");
+               $("#"+target.time[i]).css("color","black");
+               //$("#"+target.time[i]).css("background-color","#60a6d1");
+               //$("#"+target.time[i]).addClass("fixed");
+               $(this).closest('.ui-dialog-content').dialog('close');
+           }
+            
+            currentCredit += target.credit;
+            renewCurrentCredit(currentCredit);
+        });
+        
+        
+        function renewCurrentCredit(c){
+            
+            $("#currenCredit").empty();
+            $("#currenCredit").append(c);
+            if(c>=25){
+                 $("#currenCredit").css("color","#d16060");
+            }
+            else if(c>16 && c<25){
+                 $("#currenCredit").css("color","rgb(237, 203, 18)");
+            }
+            else if(c>0 && c<=16){
+                 $("#currenCredit").css("color","#83d160");
+            }
+            else if(c <= 0){
+                 $("#currenCredit").css("color","BLACK");
+            }
+        }
+        
+        $(document).on("mouseenter",".detail3",function(){
+           var target = c_3_Data[$(this).attr("id")];
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).addClass("credit3on");
+           }
+        });
+        
+        $(document).on("mouseleave",".detail3",function(){
+           var target = c_3_Data[$(this).attr("id")];
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).removeClass("credit3on");
+           }
+        });
+        
+        $(document).on("mouseenter",".detail2",function(){
+           var target = c_2_Data[$(this).attr("id")];
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).addClass("credit2on");
+           }
+        });
+        
+        $(document).on("mouseleave",".detail2",function(){
+           var target = c_2_Data[$(this).attr("id")];
+           for(var i = 0; i< target.time.length ; i++){
+               $("#"+target.time[i]).removeClass("credit2on");
+           }
+        });
+        
+        $(document).ready(function(){
+            $('#information').dialog({
+              modal:true,autoOpen: false,
+              show: { effect: "fade",duration: 500},hide: { effect: "fade",duration: 500},
+              close:function(){
+                  $('#information').empty();
+              }
+            });
+        });
+        
+        $(function(){
+            //儲存hover到的li
+            var Grid = "sss";
+            //是否在li上hover
+            var onGrid = false;
+            
+           $("#credit3").draggable({
+                helper:'clone',
+                cursor:'crosshair',
+                cursorAt:{top:-10,left:-10},
+                stop:function(){
+                   if(onGrid){
+                       $('#information').empty();
+                       //----------檢索3學分課程----------
+                        for(var x in c_3_Data){
+                            for(var i = 0;i<c_3_Data[x].time.length;i++){
+                                if(c_3_Data[x].time[i] == Grid.attr("id")){
+                                    $('#information').append("<div class=\"detail3\" id=\""+c_3_Data[x].classNumber+"\"><span>"+c_3_Data[x].classNumber+"</span>  <span>"+c_3_Data[x].className+"</span><br><span>"+c_3_Data[x].credit+"學分</span><span>"+c_3_Data[x].teacher+"</span></div>");
+                                    $('#information').dialog("open");
+                                }
+                            }
+                        }
+                       //----------檢索3學分課程----------
+                   }
+               }
+           });
+            
+           $("#credit2").draggable({
+                helper:'clone',
+                cursor:'crosshair',
+                cursorAt:{top:-10,left:-10},
+                stop:function(){
+                   if(onGrid){
+                       $('#information').empty();
+                       //----------檢索2學分課程----------
+                        for(var x in c_2_Data){
+                            for(var i = 0;i<c_2_Data[x].time.length;i++){
+                                if(c_2_Data[x].time[i] == Grid.attr("id")){
+                                    $('#information').append("<div class=\"detail2\" id=\""+c_2_Data[x].classNumber+"\"><span>"+c_2_Data[x].classNumber+"</span>  <span>"+c_2_Data[x].className+"</span><br><span>"+c_2_Data[x].credit+"學分</span><span>"+c_2_Data[x].teacher+"</span></div>");
+                                    $('#information').dialog("open");
+                                }
+                            }
+                        }
+                       //----------檢索2學分課程----------
+                   }
+               }
+           });
+            
+            $('td').hover(function(){
+                    if($(this).hasClass("fixed")) return;
+                    if(Grid!=$(this) && Grid!=""){
+                        Grid = $(this);
+                    }
+                    onGrid = true;
+                },
+                function(){
+                    if($(this).hasClass("fixed")) return;
+                    onGrid = false;
+            });
+            
+            $('td').click(function(){
+                if($(this).hasClass("fixed")|| $(this).hasClass("selected")) return;
+                $('#information').empty();
+                //----------檢索3學分課程----------
+                for(var x in c_3_Data){
+                    for(var i = 0;i<c_3_Data[x].time.length;i++){
+                        if(c_3_Data[x].time[i] == Grid.attr("id")){
+                            $('#information').append("<div class=\"detail3\" id=\""+c_3_Data[x].classNumber+"\"><span>"+c_3_Data[x].classNumber+"</span>  <span>"+c_3_Data[x].className+"</span><br><span>"+c_3_Data[x].credit+"學分</span><span>"+c_3_Data[x].teacher+"</span></div>");
+                            $('#information').dialog("open");
+                        }
+                    }
+                }
+                //----------檢索2學分課程----------
+                for(var x in c_2_Data){
+                    for(var i = 0;i<c_2_Data[x].time.length;i++){
+                        if(c_2_Data[x].time[i] == Grid.attr("id")){
+                            $('#information').append("<div class=\"detail2\" id=\""+c_2_Data[x].classNumber+"\"><span>"+c_2_Data[x].classNumber+"</span>  <span>"+c_2_Data[x].className+"</span><br><span>"+c_2_Data[x].credit+"學分</span><span>"+c_2_Data[x].teacher+"</span></div>");
+                            $('#information').dialog("open");
+                        }
+                    }
+                }
+            });
+            
+            $("#confirm").hover(function(){
+                $(this).finish();
+                $(this).animate(
+                { backgroundColor : "#00b244"},250);},
+                function(){
+                $(this).finish();
+                $(this).animate(
+                { backgroundColor : "#ffffff"},500);
+            });
+            
+            $("#confirm").click(function(){
+                alert("confirm");
+            });
+            
+            $("#cancel").hover(function(){
+                $(this).finish();
+                $(this).animate(
+                { backgroundColor : "#b20000",color : "#ffffff"},250);},
+                function(){
+                $(this).finish();
+                $(this).animate(
+                { backgroundColor : "#ffffff",color : "#000000"},500);
+            });
+            
+            $("#cancel").click(function(){
+                currentCredit = 0;
+                renewCurrentCredit(currentCredit);
+                $(".selected").empty();
+                $(".selected").removeClass("credit3on");
+                $(".selected").removeClass("credit2on");
+                $(".selected").removeClass("selected");
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="limiter">
+    <div id="listWrapper">
+                <div id="list" class="m_size m_outline">
+                   <div style="height: 40.67px;text-align:center;padding-top:20px ">
+                       學分卡
+                   </div>
+                    <hr>
+                    <div value="3" id="credit3" class="m_creditOutline credit_drag" style="height:90px;text-align:center;line-height:90px;background-color: #83d160;">
+                        <span style="font-size: 30px">3</span>
+                        <span style="font-size: 15px">學分</span>
+                    </div>
+                    <div  value="2" id="credit2" class="m_creditOutline credit_drag" style="height:60px;text-align:center;line-height: 60px;margin-top: 10px;background-color: #60a6d1;">
+                        <span style="font-size: 30px">2</span>
+                        <span style="font-size: 15px">學分</span>
+                    </div>
+                </div>
+                <div class="m_size m_outline" style="margin-top:280px;height: 150px;">
+                    <div style="text-align: center;line-height: 150px">
+                        <span id="currenCredit" style="font-size: 75px">0</span>
+                        /
+                        <span id="maxCredit" style="font-size: 25px">25</span>
+                    </div>
+                </div>
+                <div id="confirm" class="m_outline">
+                    確認
+                </div>
+                <div id="cancel" class="m_outline">
+                    清空
+                </div>
+            </div>
+		<div class="container-table100">
+			<div class="wrap-table100">
+                <div id="timetable" class="table100 ver2 m-b-110">
+                    <table data-vertable="ver2">
+                        <thead>
+                            <tr class="row100 head">
+                                    <th class="column100 column1" data-column="column1"></th>
+                                    <th class="column100 column2" data-column="column3">Monday</th>
+                                    <th class="column100 column3" data-column="column4">Tuesday</th>
+                                    <th class="column100 column4" data-column="column5">Wednesday</th>
+                                    <th class="column100 column5" data-column="column6">Thursday</th>
+                                    <th class="column100 column6" data-column="column7">Friday</th>
+                                    <th class="column100 column7" data-column="column8">Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="1" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第1節 08:10~09:00</td>
+                                <td id="101" class="column100 column2" data-column="column2"></td>
+                                <td id="201" class="column100 column3" data-column="column3"></td>
+                                <td id="301" class="column100 column4" data-column="column4"></td>
+                                <td id="401" class="column100 column5" data-column="column5"></td>
+                                <td id="501" class="column100 column6" data-column="column6"></td>
+                                <td id="601" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="2" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第2節 09:10~10:00</td>
+                                <td id="102" class="column100 column2" data-column="column2"></td>
+                                <td id="202" class="column100 column3" data-column="column3"></td>
+                                <td id="302" class="column100 column4" data-column="column4"></td>
+                                <td id="402" class="column100 column5" data-column="column5"></td>
+                                <td id="502" class="column100 column6" data-column="column6"></td>
+                                <td id="602" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="3" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第3節 10:10~11:00</td>
+                                <td id="103" class="column100 column2" data-column="column2"></td>
+                                <td id="203" class="column100 column3" data-column="column3"></td>
+                                <td id="303" class="column100 column4" data-column="column4"></td>
+                                <td id="403" class="column100 column5" data-column="column5"></td>
+                                <td id="503" class="column100 column6" data-column="column6"></td>
+                                <td id="603" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="4" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第4節 11:10~12:00</td>
+                                <td id="104"class="column100 column2" data-column="column2"></td>
+                                <td id="204" class="column100 column3" data-column="column3"></td>
+                                <td id="304" class="column100 column4" data-column="column4"></td>
+                                <td id="404" class="column100 column5" data-column="column5"></td>
+                                <td id="504" class="column100 column6" data-column="column6"></td>
+                                <td id="604" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="5" class="row100">
+                                <td class="column100 column1" data-column="column1" style="background-color: gray;color: white">
+                                第5節 12:10~13:00</td>
+                                <td class="fixed" colspan="6" style="background-color: gray"></td>
+                            </tr>
+                            <tr id="6" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第6節 13:10~14:00</td>
+                                <td id="106" class="column100 column2" data-column="column2"></td>
+                                <td id="206" class="column100 column3" data-column="column3"></td>
+                                <td id="306" class="column100 column4" data-column="column4"></td>
+                                <td id="406" class="column100 column5" data-column="column5"></td>
+                                <td id="506" class="column100 column6" data-column="column6"></td>
+                                <td id="606" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="7" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第7節 14:10~15:00</td>
+                                <td id="107" class="column100 column2" data-column="column2"></td>
+                                <td id="207" class="column100 column3" data-column="column3"></td>
+                                <td id="307" class="column100 column4" data-column="column4"></td>
+                                <td id="407" class="column100 column5" data-column="column5"></td>
+                                <td id="507" class="column100 column6" data-column="column6"></td>
+                                <td id="607" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="8" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第8節 15:10~16:00</td>
+                                <td id="108" class="column100 column2" data-column="column2"></td>
+                                <td id="208" class="column100 column3" data-column="column3"></td>
+                                <td id="308" class="column100 column4" data-column="column4"></td>
+                                <td id="408" class="column100 column5" data-column="column5"></td>
+                                <td id="508" class="column100 column6" data-column="column6"></td>
+                                <td id="608" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="9" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第9節 16:10~17:00</td>
+                                <td id="109" class="column100 column2" data-column="column2"></td>
+                                <td id="209" class="column100 column3" data-column="column3"></td>
+                                <td id="309" class="column100 column4" data-column="column4"></td>
+                                <td id="409" class="column100 column5" data-column="column5"></td>
+                                <td id="509" class="column100 column6" data-column="column6"></td>
+                                <td id="609" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="10" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第10節 17:10~18:00</td>
+                                <td id="110" class="column100 column2" data-column="column2"></td>
+                                <td id="210" class="column100 column3" data-column="column3"></td>
+                                <td id="310" class="column100 column4" data-column="column4"></td>
+                                <td id="410" class="column100 column5" data-column="column5"></td>
+                                <td id="510" class="column100 column6" data-column="column6"></td>
+                                <td id="610" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="11" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第11節 18:30~19:20</td>
+                                <td id="111" class="column100 column2" data-column="column2"></td>
+                                <td id="211" class="column100 column3" data-column="column3"></td>
+                                <td id="311" class="column100 column4" data-column="column4"></td>
+                                <td id="411" class="column100 column5" data-column="column5"></td>
+                                <td id="511" class="column100 column6" data-column="column6"></td>
+                                <td id="611" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="12" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第12節 19:30~20:20</td>
+                                <td id="112" class="column100 column2" data-column="column2"></td>
+                                <td id="212" class="column100 column3" data-column="column3"></td>
+                                <td id="312" class="column100 column4" data-column="column4"></td>
+                                <td id="412" class="column100 column5" data-column="column5"></td>
+                                <td id="512" class="column100 column6" data-column="column6"></td>
+                                <td id="612" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                            <tr id="13" class="row100">
+                                <td class="column100 column1 fixed" data-column="column1">第13節 20:30~21:20</td>
+                                <td id="113" class="column100 column2" data-column="column2"></td>
+                                <td id="213" class="column100 column3" data-column="column3"></td>
+                                <td id="313" class="column100 column4" data-column="column4"></td>
+                                <td id="413" class="column100 column5" data-column="column5"></td>
+                                <td id="513" class="column100 column6" data-column="column6"></td>
+                                <td id="613" class="column100 column7" data-column="column7"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+        </div>
+    </div>
+  </div>
+    <div id="information" title="課程列表">
+        
+    </div>
+    <div id="informationDetail" title="細節">
+        
+    </div>
+    
+    
+<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!--
+    Search 測試用
+    2017.01.10
+    從LocalStorage讀取JSON字串並轉回成object。
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script>
+        $(function(){
+            var newLi;
+            
+               if(typeof(Storage) !== "undefined") {
+
+                var data = JSON.parse(localStorage.getItem('courseData'));
+                if(data==null){
+                    alert("not found");
+                }
+                for(var x in data){
+                    
+                    if(typeof data[x] === 'object'){
+                        console.log(data[x]);
+                        for(var i = 0;i<data[x].time.length;i++){
+                            if(data[x].time[i] == 507){
+                                //$('ol').append("<li><span>"+data[x].className+data[x].classNumber+"</span></li>");
+                               newLi = document.createElement('li');
+                               newLi.id = data[x].classNumber;
+                               document.body.append(newLi);
+                               newLi.innerHTML = "<span>"+data[x].className+"</span>"+
+                                                 "<span>"+data[x].classNumber+"</span>";
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                alert("Sorry! No Web Storage support..");
+            }
+            
+            $('li').click(function(){
+                var id = $(this).attr("id");
+                alert(data[id].teacher);
+            });
+        });
+    </script>
+</head>
+<body>
+    <ol>
+        <span>202有上課</span>
+    </ol>
+</body>
+</html>
